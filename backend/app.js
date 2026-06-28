@@ -16,6 +16,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true}))
 
 app.use(bookappointmentRoute);
+
 app.get("/", (req,res) => {
      res.send("hello world");
 })
