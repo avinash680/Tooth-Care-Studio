@@ -10,7 +10,7 @@ const DoctorSection = () => {
           <div className="absolute inset-0 bg-[#1a6faf]/10 rounded-2xl scale-105"></div>
 
           <img
-            src="public/gallery/1234.png"
+            src="gallery\1234.png"
             alt="Dr. Nisha (Dua) Arora"
             className="relative w-full h-[550px] object-cover rounded-2xl border-8 border-white shadow-2xl"
           />
