@@ -17,9 +17,9 @@ const Hero = () => {
 
       {/* Content */}
       <div className="relative z-10 w-full h-[85vh] flex items-center px-6 sm:px-10 lg:px-20">
-        <div className="max-w-3xl ml-4 lg:ml-10">
+        <div className="max-w-3xl ml-4 lg:ml-10 md: mt-20">
           {/* Badge */}
-          <span className="inline-flex items-center px-4 py-2 rounded-full bg-blue-600 text-white text-xs sm:text-sm font-semibold shadow-lg mb-5">
+          <span className="inline-flex items-center px-4 py-2  rounded-full bg-blue-600 text-white text-xs sm:text-sm font-semibold shadow-lg mb-5">
             🦷 Multispecialty Dental Clinic & Pathology Lab
           </span>
 
