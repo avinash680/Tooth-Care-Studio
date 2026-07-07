@@ -1,15 +1,12 @@
 const express = require("express");
 const router = express.Router();
 
-const bookAppointmentController = require("../controllers/bookappointmentController");
+const {
+  createOrder,
+  verifyPayment,
+} = require("../controllers/paymentController");
 
-
-
-
-
-router.post(
-  "/bookappointment",
-  bookAppointmentController.bookappointment
-);
+router.post("/create-order", createOrder);
+router.post("/verify", verifyPayment);
 
 module.exports = router;

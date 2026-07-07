@@ -14,6 +14,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy/PrivacyPolicy';
 import Footer from "./components/Layout/Footer";
 import BlogPost from "./pages/Blog/Blogposts/blogpost_1";
 import TermsAndCondition from './pages/TermsAndCondition/TermsandCondition';
+import AppointmentSummery from "./features/appointments/components/Appontmentsummary";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/termsandcondition" element={<TermsAndCondition />} />
           <Route path="/privacypolicy" element={<PrivacyPolicy />} />
+          <Route path="/booking-summary" element={<AppointmentSummery />} />
            <Route path="/blogpost1" element={<BlogPost />} />
           <Route path="/book_appointment" element={<Book_Appointment />} />
         </Routes> 

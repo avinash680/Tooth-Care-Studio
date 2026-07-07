@@ -1,27 +1,120 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import {
+  ShieldAlert,
+  Layers,
+  HeartPulse,
+  Activity,
+  Smile,
+  ScanLine,
+  Baby,
+} from "lucide-react";
 
-const AboutCTA = () => {
+const TEAL = "#0E5C56";
+const CORAL = "#FF6F59";
+const MINT = "#7EE0D6";
+
+const expertiseItems = [
+  {
+    icon: ShieldAlert,
+    title: "Emergency Dental Care & Trauma Management",
+  },
+  {
+    icon: Layers,
+    title: "Oral & Maxillofacial Prosthodontics",
+  },
+  {
+    icon: HeartPulse,
+    title: "Comprehensive Pain Management & Oral Ulcer Treatment",
+  },
+  {
+    icon: Activity,
+    title: "Root Canal Therapy (RCT)",
+  },
+  {
+    icon: Smile,
+    title: "Aligner Based Orthodontics",
+  },
+  {
+    icon: ScanLine,
+    title: "CBCT Based Diagnostic & Treatment Planning",
+  },
+  {
+    icon: Baby,
+    title: "Pediatric Dentistry & Preventive Care",
+  },
+];
+
+const ExpertiseSection = () => {
   return (
-    <div className="mt-24 bg-[#1a6faf] rounded-3xl p-10 text-center text-white">
-      <h2 className="text-3xl font-bold mb-4">
-        Excellence in Modern Dentistry
-      </h2>
+    <div className="relative mt-28">
+      <div className="text-center mb-14 opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards]">
+        <span
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-sm mb-4"
+          style={{ backgroundColor: `${TEAL}14`, color: TEAL }}
+        >
+          <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: CORAL }} />
+          What We Do
+        </span>
+        <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+          Areas of Expertise
+        </h2>
+        <p className="text-gray-600 mt-3">
+          Specialized treatments delivered with precision and care.
+        </p>
+      </div>
 
-      <p className="max-w-3xl mx-auto text-blue-100">
-        With a holistic and progressive approach, Dr. Nisha (Dua) Arora
-        continues to be a trusted name in dentistry, delivering exceptional
-        care that meets both current and future demands of oral healthcare.
-      </p>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {expertiseItems.map((item, index) => {
+          const Icon = item.icon;
+          return (
+            <div
+              key={item.title}
+              className="group relative rounded-2xl p-[1.5px] opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards]"
+              style={{ animationDelay: `${index * 0.08}s` }}
+            >
+              {/* Animated gradient border on hover */}
+              <div
+                className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                style={{
+                  background: `conic-gradient(from 0deg, ${TEAL}, ${MINT}, ${CORAL}, ${TEAL})`,
+                  animation: "spin 4s linear infinite",
+                }}
+              />
 
-      <Link
-        to="/book_appointment"
-        className="inline-block mt-8 bg-white text-[#1a6faf] px-8 py-3 rounded-full font-semibold hover:scale-105 transition"
-      >
-        Book Appointment
-      </Link>
+              <div className="relative bg-white border border-gray-100 rounded-[15px] p-6 h-full flex items-start gap-4 shadow-md group-hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1">
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3"
+                  style={{ background: `linear-gradient(145deg, ${TEAL}12, ${MINT}26)` }}
+                >
+                  <Icon size={22} style={{ color: TEAL }} />
+                </div>
+                <h3 className="font-semibold text-gray-800 leading-snug pt-1.5">
+                  {item.title}
+                </h3>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <style>{`
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+          }
+        }
+      `}</style>
     </div>
   );
 };
 
-export default AboutCTA;
+export default ExpertiseSection;
