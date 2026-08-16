@@ -1,4 +1,5 @@
 import React from "react";
+import axios from "axios";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   User,
@@ -36,15 +37,31 @@ const AppointmentSummary = () => {
 
   const payNow = async () => {
     try {
-      navigate("/payment-success", {
-        state: {
+      const response = await axios.post(
+        "http://localhost:8080/payments/confirm-booking",
+        {
           fullName: appointment.patientName,
           phone: appointment.mobile,
+          email: appointment.email,
           appointmentDate: appointment.date,
           clinic: "Main Clinic",
-          paymentId: `BOOKING-${Date.now()}`,
+          message: appointment.problem,
         },
-      });
+      );
+
+      if (response.data?.success) {
+        navigate("/payment-success", {
+          state: {
+            fullName: appointment.patientName,
+            phone: appointment.mobile,
+            appointmentDate: appointment.date,
+            clinic: "Main Clinic",
+            paymentId: `BOOKING-${Date.now()}`,
+          },
+        });
+      } else {
+        navigate("/payment-failed");
+      }
     } catch (error) {
       console.error("Booking confirmation failed", error);
       navigate("/payment-failed");
