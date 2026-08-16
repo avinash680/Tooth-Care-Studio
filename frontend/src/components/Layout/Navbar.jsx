@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import "./Navbar.css";
 
+const handleNavClick = () => {
+  window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+};
+
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -17,31 +21,28 @@ const Navbar = () => {
     { name: "Home", path: "/" },
     { name: "About Us", path: "/about" },
     { name: "Services", path: "/services" },
-     {name: "Blog", path: "/blog"},
-     {name: "Testimonials", path:"/testimonials"},
+    { name: "Blog", path: "/blog" },
+    { name: "Testimonials", path: "/testimonials" },
     { name: "Gallery", path: "/gallery" },
     { name: "Contact Us", path: "/contact" },
-   
-    
-    
   ];
 
   return (
     <>
       <nav className={`navbar ${scrolled ? "scrolled" : ""}`}>
-       {/* Logo */}
-<NavLink to="/" className="logo-container">
-  <img
-    src="/media/toothcarestudio-logo.png"
-    alt="Tooth Care Studio"
-    className="logo"
-  />
+        {/* Logo */}
+        <NavLink to="/" className="logo-container">
+          <img
+            src="/media/toothcarestudio-logo.png"
+            alt="Tooth Care Studio"
+            className="logo"
+          />
 
-  <div className="logo-text">
-    <span>TOOTH CARE</span>
-    <span>STUDIO</span>
-  </div>
-</NavLink>
+          <div className="logo-text">
+            <span>TOOTH CARE</span>
+            <span>STUDIO</span>
+          </div>
+        </NavLink>
         {/* Desktop Menu */}
         <ul className="nav-links">
           {navLinks.map((link) => (
@@ -49,9 +50,8 @@ const Navbar = () => {
               <NavLink
                 to={link.path}
                 end={link.path === "/"}
-                className={({ isActive }) =>
-                  isActive ? "active-link" : ""
-                }
+                onClick={handleNavClick}
+                className={({ isActive }) => (isActive ? "active-link" : "")}
               >
                 {link.name}
               </NavLink>
@@ -64,6 +64,7 @@ const Navbar = () => {
           <NavLink
             to="/book_appointment"
             className="appointment-btn"
+            onClick={handleNavClick}
           >
             Book Appointment
           </NavLink>
@@ -88,10 +89,11 @@ const Navbar = () => {
             <NavLink
               to={link.path}
               end={link.path === "/"}
-              onClick={() => setMenuOpen(false)}
-              className={({ isActive }) =>
-                isActive ? "active-link" : ""
-              }
+              onClick={() => {
+                setMenuOpen(false);
+                handleNavClick();
+              }}
+              className={({ isActive }) => (isActive ? "active-link" : "")}
             >
               {link.name}
             </NavLink>
@@ -102,7 +104,10 @@ const Navbar = () => {
           <NavLink
             to="/book_appointment"
             className="appointment-btn"
-            onClick={() => setMenuOpen(false)}
+            onClick={() => {
+              setMenuOpen(false);
+              handleNavClick();
+            }}
           >
             Book Appointment
           </NavLink>
@@ -113,5 +118,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
-
