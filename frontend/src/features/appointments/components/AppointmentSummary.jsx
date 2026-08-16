@@ -1,7 +1,5 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { loadRazorpay } from "../../../utils/loadRazorpay";
 import {
   User,
   Phone,
@@ -37,92 +35,19 @@ const AppointmentSummary = () => {
   const totalAmount = consultationFee - discountAmount;
 
   const payNow = async () => {
-    const loaded = await loadRazorpay();
-
-    if (!loaded) {
-      alert("Razorpay SDK Failed");
-      return;
-    }
-
     try {
-      const { data } = await axios.post(
-        "http://localhost:8080/payments/create-order",
-        {
-          amount: totalAmount,
-        }
-      );
-
-      const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-
-        amount: data.order.amount,
-
-        currency: data.order.currency,
-
-        name: "Tooth Care Studio",
-
-        description: "Dental Consultation",
-
-        order_id: data.order.id,
-
-        prefill: {
-          name: appointment.patientName,
-          email: appointment.email,
-          contact: appointment.mobile,
+      navigate("/payment-success", {
+        state: {
+          fullName: appointment.patientName,
+          phone: appointment.mobile,
+          appointmentDate: appointment.date,
+          clinic: "Main Clinic",
+          paymentId: `BOOKING-${Date.now()}`,
         },
-
-        theme: {
-          color: TEAL,
-        },
-
-        handler: async function (response) {
-          try {
-            const verify = await axios.post(
-              "http://localhost:8080/payments/verify",
-              {
-                ...response,
-
-                fullName: appointment.patientName,
-                phone: appointment.mobile,
-                email: appointment.email,
-                appointmentDate: appointment.date,
-                clinic: "Main Clinic",
-                message: appointment.problem,
-              }
-            );
-
-            if (verify.data.success) {
-              navigate("/payment-success", {
-                state: {
-                  fullName: appointment.patientName,
-                  phone: appointment.mobile,
-                  appointmentDate: appointment.date,
-                  clinic: "Main Clinic",
-                  paymentId: response.razorpay_payment_id,
-                },
-              });
-            } else {
-              navigate("/payment-failed");
-            }
-          } catch (err) {
-            console.log(err);
-            navigate("/payment-failed");
-          }
-        },
-
-        modal: {
-          ondismiss: function () {
-            navigate("/payment-failed");
-          },
-        },
-      };
-
-      const razorpay = new window.Razorpay(options);
-
-      razorpay.open();
+      });
     } catch (error) {
-      console.log(error);
-      alert("Unable to start payment.");
+      console.error("Booking confirmation failed", error);
+      navigate("/payment-failed");
     }
   };
 
@@ -142,7 +67,9 @@ const AppointmentSummary = () => {
         {/* Header */}
         <div
           className="relative px-6 py-4 text-white overflow-hidden flex-shrink-0"
-          style={{ background: `linear-gradient(135deg, ${TEAL} 0%, ${TEAL_DEEP} 100%)` }}
+          style={{
+            background: `linear-gradient(135deg, ${TEAL} 0%, ${TEAL_DEEP} 100%)`,
+          }}
         >
           <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/5"></div>
           <div className="relative z-10 flex items-center justify-between gap-4">
@@ -234,7 +161,9 @@ const AppointmentSummary = () => {
           >
             <div className="flex items-center gap-2 mb-2.5">
               <ShieldCheck size={16} style={{ color: TEAL }} />
-              <h3 className="font-bold text-slate-800 text-sm">Payment Summary</h3>
+              <h3 className="font-bold text-slate-800 text-sm">
+                Payment Summary
+              </h3>
             </div>
 
             <div className="flex justify-between text-xs text-slate-600 mb-1.5">
@@ -280,7 +209,7 @@ const AppointmentSummary = () => {
             }}
           >
             <CreditCard size={16} />
-            Pay ₹{totalAmount}
+            Confirm Booking
           </button>
         </div>
       </div>

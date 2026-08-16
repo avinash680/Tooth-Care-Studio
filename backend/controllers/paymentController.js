@@ -1,28 +1,17 @@
-const Razorpay = require("razorpay");
-const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY,
-  key_secret: process.env.RAZORPAY_SECRET,
-});
-
-// Create Razorpay Order
 exports.createOrder = async (req, res) => {
   try {
     const { amount } = req.body;
-
-    const options = {
-      amount: amount * 100, // ₹300 -> 30000 paise
-      currency: "INR",
-      receipt: `receipt_${Date.now()}`,
-    };
-
-    const order = await razorpay.orders.create(options);
+    const numericAmount = Number(amount) || 0;
 
     res.status(200).json({
       success: true,
-      order,
+      order: {
+        amount: numericAmount * 100,
+        currency: "INR",
+        id: `booking_${Date.now()}`,
+      },
     });
   } catch (error) {
     res.status(500).json({
@@ -32,38 +21,11 @@ exports.createOrder = async (req, res) => {
   }
 };
 
-// Verify Payment
 exports.verifyPayment = async (req, res) => {
   try {
-    const {
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature,
+    const { fullName, phone, email, appointmentDate, clinic, message } =
+      req.body;
 
-      fullName,
-      phone,
-      email,
-      appointmentDate,
-      clinic,
-      message,
-    } = req.body;
-
-    // Verify Signature
-    const body = razorpay_order_id + "|" + razorpay_payment_id;
-
-    const expectedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_SECRET)
-      .update(body)
-      .digest("hex");
-
-    if (expectedSignature !== razorpay_signature) {
-      return res.status(400).json({
-        success: false,
-        message: "Payment Verification Failed",
-      });
-    }
-
-    // Send Emails
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -72,7 +34,8 @@ exports.verifyPayment = async (req, res) => {
       },
     });
 
-    // Admin Email
+    const bookingId = `BOOKING-${Date.now()}`;
+
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: process.env.ADMIN_EMAIL,
@@ -89,11 +52,10 @@ exports.verifyPayment = async (req, res) => {
 
         <hr/>
 
-        <p><strong>Payment ID:</strong> ${razorpay_payment_id}</p>
+        <p><strong>Booking ID:</strong> ${bookingId}</p>
       `,
     });
 
-    // User Email
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
@@ -103,16 +65,13 @@ exports.verifyPayment = async (req, res) => {
 
         <p>Hello <b>${fullName}</b>,</p>
 
-        <p>Your payment has been received successfully.</p>
-
         <p>Your appointment request has been confirmed.</p>
 
         <hr/>
 
         <p><strong>Date:</strong> ${appointmentDate}</p>
         <p><strong>Clinic:</strong> ${clinic}</p>
-
-        <p><strong>Payment ID:</strong> ${razorpay_payment_id}</p>
+        <p><strong>Booking ID:</strong> ${bookingId}</p>
 
         <br/>
 
@@ -122,7 +81,7 @@ exports.verifyPayment = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Payment Verified Successfully",
+      message: "Booking Confirmed Successfully",
     });
   } catch (error) {
     console.log(error);
