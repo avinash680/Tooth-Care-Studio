@@ -1,17 +1,17 @@
 import React from "react";
-import axios from "axios";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   User,
   Phone,
   Mail,
   CalendarDays,
   FileText,
-  ShieldCheck,
   ArrowLeft,
-  CreditCard,
   Stethoscope,
+  CheckCircle2,
+  Loader2,
 } from "lucide-react";
+import { API_BASE_URL } from "../../../config/api";
 
 const TEAL = "#0E5C56";
 const TEAL_DEEP = "#093F3B";
@@ -20,8 +20,6 @@ const CREAM = "#FAF7F2";
 
 const AppointmentSummary = () => {
   const { state } = useLocation();
-  const navigate = useNavigate();
-
   const appointment = state || {
     patientName: "Avinash",
     mobile: "9876543210",
@@ -30,41 +28,37 @@ const AppointmentSummary = () => {
     problem: "Tooth Pain",
   };
 
-  const consultationFee = 300;
-  const discount = 20;
-  const discountAmount = (consultationFee * discount) / 100;
-  const totalAmount = consultationFee - discountAmount;
+  const [submitting, setSubmitting] = React.useState(false);
+  const [bookingId, setBookingId] = React.useState("");
+  const [error, setError] = React.useState("");
 
-  const payNow = async () => {
+  const confirmAppointment = async () => {
+    setSubmitting(true);
+    setError("");
     try {
-      const response = await axios.post(
-        "http://localhost:8080/payments/confirm-booking",
-        {
+      const response = await fetch(`${API_BASE_URL}/appointments/confirm`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           fullName: appointment.patientName,
           phone: appointment.mobile,
           email: appointment.email,
           appointmentDate: appointment.date,
           clinic: "Main Clinic",
           message: appointment.problem,
-        },
-      );
+        }),
+      });
+      const result = await response.json();
 
-      if (response.data?.success) {
-        navigate("/payment-success", {
-          state: {
-            fullName: appointment.patientName,
-            phone: appointment.mobile,
-            appointmentDate: appointment.date,
-            clinic: "Main Clinic",
-            paymentId: `BOOKING-${Date.now()}`,
-          },
-        });
-      } else {
-        navigate("/payment-failed");
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || "Unable to confirm appointment.");
       }
+      setBookingId(result.bookingId || "Confirmed");
     } catch (error) {
-      console.error("Booking confirmation failed", error);
-      navigate("/payment-failed");
+      console.error("Appointment confirmation failed", error);
+      setError(error.message || "Unable to confirm appointment.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -98,12 +92,6 @@ const AppointmentSummary = () => {
               <h1 className="text-xl md:text-2xl font-bold leading-snug">
                 Review & Confirm
               </h1>
-            </div>
-            <div className="text-right flex-shrink-0">
-              <p className="text-[11px] text-white/70">Total Payable</p>
-              <p className="text-xl font-bold" style={{ color: CORAL }}>
-                ₹{totalAmount}
-              </p>
             </div>
           </div>
         </div>
@@ -171,39 +159,27 @@ const AppointmentSummary = () => {
             </div>
           </div>
 
-          {/* Payment */}
+          {/* Confirmation */}
           <div
             className="rounded-xl p-4 border"
             style={{ backgroundColor: `${TEAL}0D`, borderColor: `${TEAL}33` }}
           >
             <div className="flex items-center gap-2 mb-2.5">
-              <ShieldCheck size={16} style={{ color: TEAL }} />
+              <CheckCircle2 size={16} style={{ color: TEAL }} />
               <h3 className="font-bold text-slate-800 text-sm">
-                Payment Summary
+                Appointment Confirmation
               </h3>
             </div>
-
-            <div className="flex justify-between text-xs text-slate-600 mb-1.5">
-              <span>Consultation Fee</span>
-              <span className="font-medium">₹{consultationFee}</span>
-            </div>
-
-            <div className="flex justify-between text-xs mb-2 pb-2 border-b border-dashed border-slate-300">
-              <span style={{ color: TEAL }}>Discount ({discount}%)</span>
-              <span className="font-medium" style={{ color: TEAL }}>
-                -₹{discountAmount}
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center">
-              <span className="font-semibold text-slate-800 text-sm">
-                Total Payable
-              </span>
-              <span className="text-xl font-bold" style={{ color: TEAL }}>
-                ₹{totalAmount}
-              </span>
-            </div>
+            <p className="text-xs text-slate-600">
+              The clinic will contact you to finalize your appointment.
+            </p>
           </div>
+          {bookingId && (
+            <p className="text-sm text-green-700">
+              Appointment confirmed. Booking ID: {bookingId}
+            </p>
+          )}
+          {error && <p className="text-sm text-red-600">{error}</p>}
         </div>
 
         {/* Actions */}
@@ -218,15 +194,20 @@ const AppointmentSummary = () => {
           </Link>
 
           <button
-            onClick={payNow}
+            onClick={confirmAppointment}
+            disabled={submitting || Boolean(bookingId)}
             className="flex-1 text-white py-2.5 rounded-lg font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2 hover:-translate-y-0.5 active:translate-y-0"
             style={{
               backgroundColor: CORAL,
               boxShadow: `0 10px 20px -10px ${CORAL}80`,
             }}
           >
-            <CreditCard size={16} />
-            Confirm Booking
+            {submitting ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <CheckCircle2 size={16} />
+            )}
+            {bookingId ? "Appointment Confirmed" : "Confirm Appointment"}
           </button>
         </div>
       </div>

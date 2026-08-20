@@ -134,7 +134,7 @@
 //             </h3>
 
 //             <p className="text-gray-600">
-//               Advance payment required
+//               Consultation details required
 //             </p>
 //           </div>
 
@@ -148,7 +148,7 @@
 //           type="submit"
 //           className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold text-lg transition duration-300"
 //         >
-//           Proceed to Payment
+//           Continue to Confirmation
 //         </button>
 
 //       </form>
@@ -158,8 +158,6 @@
 
 // export default AppointmentForm;
 
-
-
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -168,7 +166,6 @@ import {
   Mail,
   CalendarDays,
   Stethoscope,
-  ShieldCheck,
   ArrowRight,
   Loader2,
   AlertCircle,
@@ -204,17 +201,23 @@ const AppointmentForm = () => {
 
   const errors = useMemo(() => {
     const e = {};
-    if (!formData.patientName.trim()) e.patientName = "Enter the patient's full name.";
-    if (!/^[6-9]\d{9}$/.test(formData.mobile)) e.mobile = "Enter a valid 10-digit number.";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) e.email = "Enter a valid email.";
+    if (!formData.patientName.trim())
+      e.patientName = "Enter the patient's full name.";
+    if (!/^[6-9]\d{9}$/.test(formData.mobile))
+      e.mobile = "Enter a valid 10-digit number.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
+      e.email = "Enter a valid email.";
     if (!formData.date) e.date = "Select a date.";
     else if (new Date(formData.date) < new Date(new Date().toDateString()))
       e.date = "Date cannot be in the past.";
-    if (formData.problem.trim().length < 5) e.problem = "Describe the reason for your visit.";
+    if (formData.problem.trim().length < 5)
+      e.problem = "Describe the reason for your visit.";
     return e;
   }, [formData]);
 
-  const completedCount = fields.filter((f) => formData[f.key] && !errors[f.key]).length;
+  const completedCount = fields.filter(
+    (f) => formData[f.key] && !errors[f.key],
+  ).length;
   const progress = Math.round((completedCount / fields.length) * 100);
 
   const handleChange = (e) => {
@@ -259,7 +262,9 @@ const AppointmentForm = () => {
         {/* Header */}
         <div
           className="relative px-6 py-5 text-white overflow-hidden flex-shrink-0"
-          style={{ background: `linear-gradient(135deg, ${TEAL} 0%, ${TEAL_DEEP} 100%)` }}
+          style={{
+            background: `linear-gradient(135deg, ${TEAL} 0%, ${TEAL_DEEP} 100%)`,
+          }}
         >
           <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/5"></div>
 
@@ -275,7 +280,9 @@ const AppointmentForm = () => {
             </div>
             <div className="text-right flex-shrink-0">
               <p className="text-[11px] text-white/70">Fee</p>
-              <p className="text-xl font-bold" style={{ color: CORAL }}>₹300</p>
+              <p className="text-xl font-bold" style={{ color: CORAL }}>
+                ₹300
+              </p>
             </div>
           </div>
 
@@ -410,11 +417,18 @@ const AppointmentForm = () => {
             <div className="flex items-end">
               <div
                 className="w-full rounded-lg px-3 py-2 border flex items-center gap-2"
-                style={{ backgroundColor: `${TEAL}0D`, borderColor: `${TEAL}33` }}
+                style={{
+                  backgroundColor: `${TEAL}0D`,
+                  borderColor: `${TEAL}33`,
+                }}
               >
-                <ShieldCheck size={16} style={{ color: TEAL }} className="flex-shrink-0" />
+                <CheckCircle2
+                  size={16}
+                  style={{ color: TEAL }}
+                  className="flex-shrink-0"
+                />
                 <p className="text-[11px] text-slate-500 leading-snug">
-                  Advance payment secures your slot
+                  Your preferred date will be confirmed by the clinic.
                 </p>
               </div>
             </div>
@@ -462,7 +476,7 @@ const AppointmentForm = () => {
               </>
             ) : (
               <>
-                Proceed to Payment
+                Continue to Confirmation
                 <ArrowRight size={18} />
               </>
             )}
