@@ -22,35 +22,37 @@ exports.bookAppointment = async (req, res) => {
 
     const bookingId = `BOOKING-${Date.now()}`;
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: process.env.ADMIN_EMAIL,
-      subject: "New Appointment Booking",
-      html: `
-        <h2>New Appointment</h2>
-        <p><strong>Name:</strong> ${fullName}</p>
-        <p><strong>Phone:</strong> ${phone}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Date:</strong> ${appointmentDate}</p>
-        <p><strong>Clinic:</strong> ${clinic}</p>
-        <p><strong>Problem:</strong> ${message || "Not provided"}</p>
-        <p><strong>Booking ID:</strong> ${bookingId}</p>
-      `,
-    });
-
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Appointment Confirmed",
-      html: `
-        <h2>Appointment Confirmed</h2>
-        <p>Hello <b>${fullName}</b>,</p>
-        <p>Your appointment request has been confirmed.</p>
-        <p><strong>Date:</strong> ${appointmentDate}</p>
-        <p><strong>Clinic:</strong> ${clinic}</p>
-        <p><strong>Booking ID:</strong> ${bookingId}</p>
-      `,
-    });
+    await Promise.all([
+      transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: process.env.ADMIN_EMAIL,
+        replyTo: email,
+        subject: "New Appointment Booking",
+        html: `
+          <h2>New Appointment</h2>
+          <p><strong>Name:</strong> ${fullName}</p>
+          <p><strong>Phone:</strong> ${phone}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Date:</strong> ${appointmentDate}</p>
+          <p><strong>Clinic:</strong> ${clinic}</p>
+          <p><strong>Problem:</strong> ${message || "Not provided"}</p>
+          <p><strong>Booking ID:</strong> ${bookingId}</p>
+        `,
+      }),
+      transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Appointment Request Received",
+        html: `
+          <h2>Appointment Request Received</h2>
+          <p>Hello <b>${fullName}</b>,</p>
+          <p>We received your appointment request. The clinic will contact you to finalize the appointment.</p>
+          <p><strong>Date:</strong> ${appointmentDate}</p>
+          <p><strong>Clinic:</strong> ${clinic}</p>
+          <p><strong>Booking ID:</strong> ${bookingId}</p>
+        `,
+      }),
+    ]);
 
     res.status(200).json({
       success: true,

@@ -1,165 +1,4 @@
-// import React, { useState } from "react";
-// import { useNavigate } from "react-router-dom";
-
-// const AppointmentForm = () => {
-//   const navigate = useNavigate();
-
-//   const [formData, setFormData] = useState({
-//     patientName: "",
-//     mobile: "",
-//     email: "",
-//     date: "",
-//     problem: "",
-//   });
-
-//   const handleChange = (e) => {
-//     setFormData((prev) => ({
-//       ...prev,
-//       [e.target.name]: e.target.value,
-//     }));
-//   };
-
-//   const handleSubmit = (e) => {
-//     e.preventDefault();
-
-//     navigate("/booking-summary", {
-//       state: formData,
-//     });
-//   };
-
-//   return (
-//     <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-//       {/* Header */}
-//       <div className="bg-blue-600 text-white p-6">
-//         <h1 className="text-3xl font-bold">
-//           Book Appointment
-//         </h1>
-//         <p className="text-blue-100 mt-2">
-//           Fill in your details to schedule your dental consultation.
-//         </p>
-//       </div>
-
-//       {/* Form */}
-//       <form onSubmit={handleSubmit} className="p-8 space-y-6">
-
-//         {/* Patient Name */}
-//         <div>
-//           <label className="block font-semibold mb-2">
-//             Patient Name
-//           </label>
-
-//           <input
-//             type="text"
-//             name="patientName"
-//             value={formData.patientName}
-//             onChange={handleChange}
-//             placeholder="Enter full name"
-//             required
-//             className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-//           />
-//         </div>
-
-//         {/* Mobile */}
-//         <div>
-//           <label className="block font-semibold mb-2">
-//             Mobile Number
-//           </label>
-
-//           <input
-//             type="tel"
-//             name="mobile"
-//             value={formData.mobile}
-//             onChange={handleChange}
-//             placeholder="9876543210"
-//             required
-//             className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-//           />
-//         </div>
-
-//         {/* Email */}
-//         <div>
-//           <label className="block font-semibold mb-2">
-//             Email Address
-//           </label>
-
-//           <input
-//             type="email"
-//             name="email"
-//             value={formData.email}
-//             onChange={handleChange}
-//             placeholder="example@gmail.com"
-//             required
-//             className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-//           />
-//         </div>
-
-//         {/* Appointment Date */}
-//         <div>
-//           <label className="block font-semibold mb-2">
-//             Appointment Date
-//           </label>
-
-//           <input
-//             type="date"
-//             name="date"
-//             value={formData.date}
-//             onChange={handleChange}
-//             required
-//             className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-//           />
-//         </div>
-
-//         {/* Problem */}
-//         <div>
-//           <label className="block font-semibold mb-2">
-//             Problem / Reason for Visit
-//           </label>
-
-//           <textarea
-//             rows="4"
-//             name="problem"
-//             value={formData.problem}
-//             onChange={handleChange}
-//             placeholder="Describe your dental problem..."
-//             required
-//             className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-//           />
-//         </div>
-
-//         {/* Fee Card */}
-//         <div className="bg-blue-50 rounded-xl p-5 border border-blue-200 flex justify-between items-center">
-//           <div>
-//             <h3 className="font-bold text-lg">
-//               Consultation Fee
-//             </h3>
-
-//             <p className="text-gray-600">
-//               Consultation details required
-//             </p>
-//           </div>
-
-//           <h2 className="text-3xl font-bold text-blue-700">
-//             ₹300
-//           </h2>
-//         </div>
-
-//         {/* Button */}
-//         <button
-//           type="submit"
-//           className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold text-lg transition duration-300"
-//         >
-//           Continue to Confirmation
-//         </button>
-
-//       </form>
-//     </div>
-//   );
-// };
-
-// export default AppointmentForm;
-
 import React, { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   User,
   Phone,
@@ -171,6 +10,7 @@ import {
   AlertCircle,
   CheckCircle2,
 } from "lucide-react";
+import { API_BASE_URL } from "../../../config/api";
 
 const TEAL = "#0E5C56";
 const TEAL_DEEP = "#093F3B";
@@ -186,8 +26,6 @@ const fields = [
 ];
 
 const AppointmentForm = () => {
-  const navigate = useNavigate();
-
   const [formData, setFormData] = useState({
     patientName: "",
     mobile: "",
@@ -198,6 +36,8 @@ const AppointmentForm = () => {
 
   const [touched, setTouched] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [bookingId, setBookingId] = useState("");
+  const [submitError, setSubmitError] = useState("");
 
   const errors = useMemo(() => {
     const e = {};
@@ -228,7 +68,7 @@ const AppointmentForm = () => {
     setTouched((prev) => ({ ...prev, [e.target.name]: true }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setTouched({
       patientName: true,
@@ -241,9 +81,39 @@ const AppointmentForm = () => {
     if (Object.keys(errors).length > 0) return;
 
     setSubmitting(true);
-    setTimeout(() => {
-      navigate("/booking-summary", { state: formData });
-    }, 700);
+    setSubmitError("");
+    setBookingId("");
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/appointments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: formData.patientName,
+          phone: formData.mobile,
+          email: formData.email,
+          appointmentDate: formData.date,
+          clinic: "Main Clinic",
+          message: formData.problem,
+        }),
+      });
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || "Unable to submit appointment.");
+      }
+
+      setBookingId(result.bookingId || "Confirmed");
+    } catch (error) {
+      console.error("Appointment submission failed", error);
+      setSubmitError(
+        error instanceof TypeError
+          ? "Unable to reach the appointment server. Please try again later."
+          : error.message || "Unable to submit appointment.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const fieldClass = (key) =>
@@ -277,12 +147,6 @@ const AppointmentForm = () => {
               <h1 className="text-xl md:text-2xl font-bold leading-snug">
                 Book Your Appointment
               </h1>
-            </div>
-            <div className="text-right flex-shrink-0">
-              <p className="text-[11px] text-white/70">Fee</p>
-              <p className="text-xl font-bold" style={{ color: CORAL }}>
-                ₹300
-              </p>
             </div>
           </div>
 
@@ -476,11 +340,20 @@ const AppointmentForm = () => {
               </>
             ) : (
               <>
-                Continue to Confirmation
+                Submit Consultation
                 <ArrowRight size={18} />
               </>
             )}
           </button>
+
+          {bookingId && (
+            <p className="text-center text-sm text-green-700">
+              Appointment submitted successfully. Booking ID: {bookingId}
+            </p>
+          )}
+          {submitError && (
+            <p className="text-center text-sm text-red-600">{submitError}</p>
+          )}
 
           <p className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
             <CheckCircle2 size={12} />
